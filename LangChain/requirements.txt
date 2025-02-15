@@ -1,0 +1,11 @@
+streamlit
+langchain
+langchain-community
+chromadb
+huggingface_hub
+dotenv
+crewai-tools
+serper
+torch
+transformers
+sentencepiece
