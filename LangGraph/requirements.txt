@@ -4,3 +4,4 @@ langchain_huggingface
 chromadb
 python-dotenv
 crewAI-tools
+flask

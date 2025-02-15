@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: research-report-app
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SERPER_API_KEY
+        value"b428d50a0e08a3ee935b311a69c5a89f41627624"
+      - key: HUGGINGFACEHUB_API_TOKEN
+        value: "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"
+      - key: FLASK_ENV
+        value: production
