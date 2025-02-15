@@ -6,8 +6,8 @@ services:
     startCommand: gunicorn app:app
     envVars:
       - key: SERPER_API_KEY
-        value"b428d50a0e08a3ee935b311a69c5a89f41627624"
+        value: YOUR_SERPER_API_KEY
       - key: HUGGINGFACEHUB_API_TOKEN
-        value: "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"
+        value: YOUR_HUGGINGFACEHUB_API_TOKEN
       - key: FLASK_ENV
         value: production
