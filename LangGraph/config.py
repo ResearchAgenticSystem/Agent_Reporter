@@ -21,7 +21,7 @@ def get_llm() -> BaseLLM:
     
     try:
         return HuggingFaceEndpoint(
-            repo_id="mistralai/Mistral-7B-Instruct",
+            repo_id="mistralai/Mistral-7B-Instruct-v0.3",
             huggingfacehub_api_token=api_token,
             temperature=0.7,
             max_length=4096,  # ✅ Increased from 2048 to 4096
