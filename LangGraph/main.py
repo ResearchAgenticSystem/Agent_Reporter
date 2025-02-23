@@ -34,19 +34,10 @@ if __name__ == "__main__":
     try:
         executor = create_workflow()
         state = ResearchState(topic=topic, llm=llm)
-        state_dict = asdict(state)  # Ensure correct conversion to dictionary
-        state_dict.pop("llm", None)  # Remove non-serializable field
-
-        
-        print(f"DEBUG: state_dict type -> {type(state_dict)}")  # Add this line
-        print(f"DEBUG: state_dict content -> {state_dict}")  # Add this line
-        state_obj = ResearchState(**state_dict)  # Convert dictionary back to object
-        state_dict = asdict(state_obj)
-
-        # Ensure all values in the dictionary are serializable (convert objects to strings if needed)
-        state_dict = {key: str(value) if not isinstance(value, (str, int, float, bool, list, dict)) else value for key, value in state_dict.items()}
+        state_dict = asdict(state)  
+        state_dict.pop("llm", None)  
 
         result = executor.invoke(state_dict)
-        print(result["message"])  # Access the message from the result dictionary
+        print(result["message"])  
     except Exception as e:
         print(f"Error running workflow: {str(e)}")

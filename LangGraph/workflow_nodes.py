@@ -1,13 +1,11 @@
 import os
 import json
-import uuid
-from typing import List, Dict
 import requests
+from typing import Dict
 from langchain.prompts import PromptTemplate
 from state import ResearchState
-from config import BASE_DIR, collection
+from config import BASE_DIR, llm
 from dataclasses import asdict
-from config import llm
 
 class ResearchTool:
     def __init__(self):
@@ -28,12 +26,7 @@ class ResearchTool:
             response.raise_for_status()
             
             results = response.json()
-            snippets = []
-
-            if 'organic' in results:
-                for result in results['organic'][:3]:  # Get first 3 results
-                    if 'snippet' in result:
-                        snippets.append(result['snippet'])
+            snippets = [result['snippet'] for result in results.get('organic', [])[:3] if 'snippet' in result]
             
             return " ".join(snippets) if snippets else ""
         except Exception as e:
@@ -41,86 +34,72 @@ class ResearchTool:
             return ""
 
 def get_user_input(state: Dict) -> Dict:
-    return asdict(ResearchState(**state))  # Ensure conversion
+    return asdict(ResearchState(**state))
 
 def get_research(state: Dict) -> Dict:
     research_state = ResearchState(**state)  
     topic = research_state.topic
     
-    results = collection.query(query_texts=[topic], n_results=3)
-
-    # ✅ Ensure only relevant results are used
-    if results["documents"] and any(results["documents"]):
-        retrieved_text = results["documents"][0]
-        if isinstance(retrieved_text, list):
-            retrieved_text = " ".join(retrieved_text)  # Convert list to string
-        # ✅ Check if the retrieved text is actually about the topic
-        if topic.lower() in retrieved_text.lower():
-            research_state.research_summary = retrieved_text
-        else:
-            research_state.research_summary = f"No relevant research found for {topic}."
-    else:
-        research_state.research_summary = f"No research data found for {topic}."
-
+    print(f"🔎 Fetching research from Google Search for: {topic}...")
+    search_tool = ResearchTool()
+    research_state.research_summary = search_tool.search(topic)
+    
     return asdict(research_state)
 
 def generate_news_article(state: Dict) -> Dict:
     research_state = ResearchState(**state)
-    
-    if not research_state.research_summary:
+
+    if not research_state.research_summary.strip():
         research_state.article = "No research data available."
         return asdict(research_state)  
 
-    # ✅ Debugging log to check research summary before article generation
-    print(f"DEBUG: Research Summary for {research_state.topic}:\n{research_state.research_summary}")
+    print(f"📝 Research found, processing with AI agent...")
 
-    article_prompt = PromptTemplate(
-        input_variables=["research_summary", "topic"],
-        template="""
-        Write a 5-paragraph detailed news article about "{topic}" based on the research summary provided. 
-        - **Introduction:** Briefly introduce the topic.
-        - **Key Insights:** Highlight 3-4 important points from the research.
-        - **Industry Impact:** Explain how it affects the industry.
-        - **Future Prospects:** Discuss expected developments.
-        - **Conclusion:** Summarize the significance of the topic.
-        
-        Research Summary:
-        {research_summary}
-        """
-    )
-
-    try:
-        # Ensure research summary is a string (not a list)
-        summary_text = "\n".join(research_state.research_summary) if isinstance(research_state.research_summary, list) else research_state.research_summary
-
-        prompt_text = article_prompt.format(
-            research_summary=summary_text, 
-            topic=research_state.topic
-        )
-
-        # ✅ Generate article
-        response = llm.invoke(prompt_text)
-
-        # ✅ Extract text correctly
-        if isinstance(response, dict) and "generated_text" in response:
-            research_state.article = response["generated_text"]
-        else:
-            research_state.article = str(response)
-
-        # ✅ If the article is too short, generate more content
-        while len(research_state.article.split()) < 400:
-            followup_prompt = f"Continue the article about {research_state.topic}, expanding on the key insights: {research_state.article}"
-            followup_response = llm.invoke(followup_prompt)
-
-            if isinstance(followup_response, dict) and "generated_text" in followup_response:
-                research_state.article += "\n\n" + followup_response["generated_text"]
-            else:
-                research_state.article += "\n\n" + str(followup_response)
-
-    except Exception as e:
-        research_state.article = f"Error generating article: {str(e)}"
+    article_prompt = f"""
+    Write a well-structured news article on "{research_state.topic}" based on the research summary:
     
+    {research_state.research_summary}
+    
+    Ensure the article follows this structure:
+
+    **Title:** A compelling title.
+    
+    **Introduction:** Provide background and context.
+    
+    **Key Insights:** Highlight important aspects.
+    
+    **Industry Impact:** Explain the significance.
+    
+    **Future Prospects:** Discuss upcoming developments.
+    
+    **Conclusion:** Summarize key takeaways.
+    
+    Generate at least 700 words.
+    
+    Format the article in markdown.
+    """
+
+    response = llm.invoke(article_prompt)
+    article_text = response.get("text", "").strip() if isinstance(response, dict) else str(response).strip()
+
+    # If the article is too short, retry with an expansion prompt
+    while len(article_text.split()) < 400:
+        print("⚠️ Article too short, requesting additional content...")
+        followup_prompt = f"Continue writing and expand the following article:\n\n{article_text}"
+        followup_response = llm.invoke(followup_prompt)
+        additional_text = followup_response.get("text", "").strip() if isinstance(followup_response, dict) else str(followup_response).strip()
+
+        if additional_text not in article_text:
+            article_text += "\n\n" + additional_text
+        else:
+            print("⚠️ No new content generated, stopping expansion.")
+            break
+
+    research_state.article = article_text
     return asdict(research_state)
+
+
+
 
 def save_output(state: Dict) -> Dict:
     research_state = ResearchState(**state)
