@@ -1,8 +1,0 @@
-langgraph
-langchain
-langchain_huggingface
-chromadb
-python-dotenv
-crewAI-tools
-flask
-gunicorn==21.2.0

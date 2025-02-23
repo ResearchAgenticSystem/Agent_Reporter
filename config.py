@@ -17,14 +17,10 @@ def get_llm() -> BaseLLM:
     
     try:
         return HuggingFaceEndpoint(
-<<<<<<< HEAD
             repo_id="deepseek-ai/deepseek-llm-r1-7b",  
-=======
-            repo_id="mistralai/Mistral-7B-Instruct-v0.3",
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
             huggingfacehub_api_token=api_token,
             temperature=0.7,
-            max_length=4096,
+            max_length=8192,  
             task="text-generation"
         )
     except Exception as e:
