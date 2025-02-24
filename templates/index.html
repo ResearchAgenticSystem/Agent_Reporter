@@ -1,101 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Research Report Generator</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Reporter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        .loader {
-            display: none;
-            border: 5px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 5px solid #3498db;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+        .article-content {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            padding: 2rem;
+            line-height: 1.8;
+            max-width: 100%;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .article-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 1.5rem 0 1rem 0;
+            line-height: 1.4;
+        }
+        
+        .article-content h2, 
+        .article-content strong {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 1.25rem 0 0.75rem 0;
+            display: block;
+        }
+        
+        .article-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .article-content p {
+            margin: 0.75rem 0;
+            line-height: 1.7;
+            white-space: normal;
+        }
+        
+        .article-content ul,
+        .article-content ol {
+            margin: 1rem 0 1rem 1.5rem;
+            padding-left: 1rem;
+        }
+        
+        .article-content li {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        /* Remove asterisks from rendered content */
+        .article-content {
+            font-family: 'Arial', sans-serif;
+        }
+        
+        /* Add proper spacing between sections */
+        .article-content > * + * {
+            margin-top: 1.5rem;
+        }
+        
+        /* Ensure container doesn't overflow */
+        #articleContent {
+            max-width: 100%;
+            overflow-x: hidden;
+            word-break: break-word;
+        }
+
+        /* Container for the entire article section */
+        #articleSection {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
         }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4">Research Report Generator</h1>
-        
-        <div class="card mb-4">
-            <div class="card-body">
-                <form id="reportForm">
-                    <div class="mb-3">
-                        <label for="topicInput" class="form-label">Enter Research Topic:</label>
-                        <input type="text" class="form-control" id="topicInput" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Generate Report</button>
-                </form>
-                <div class="mt-3 text-center">
-                    <div class="loader"></div>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Agent Reporter</h1>
+            
+            <form id="researchForm" class="space-y-4">
+                <div>
+                    <label for="topic" class="block text-sm font-medium text-gray-700">Research Topic</label>
+                    <input type="text" id="topic" name="topic" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Enter your research topic">
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Generate Report
+                </button>
+            </form>
+
+            <div id="loadingIndicator" class="hidden mt-4">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span class="text-gray-600">Generating report...</span>
                 </div>
             </div>
-        </div>
 
-        <div id="resultContainer" class="d-none">
-            <div class="card">
-                <div class="card-header">Generated Report</div>
-                <div class="card-body">
-                    <div id="reportContent" class="mb-3"></div>
-                    <button onclick="downloadReport()" class="btn btn-success">Download Report</button>
+            <div id="resultSection" class="hidden mt-6 space-y-4">
+                <div id="statusMessage" class="p-4 rounded-md"></div>
+                
+                <div id="articleSection" class="hidden mt-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Generated Article</h2>
+                    <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                        <div id="articleContent" class="article-content">
+                            <!-- Article content will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center">
+                        <button id="downloadButton" 
+                                class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            Download as PDF
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('reportForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const topic = document.getElementById('topicInput').value;
-            const loader = document.querySelector('.loader');
-            const resultContainer = document.getElementById('resultContainer');
-            
-            loader.style.display = 'block';
-            resultContainer.classList.add('d-none');
+        $(document).ready(function() {
+            let currentTopic = '';
 
-            try {
-                const response = await fetch('/generate_report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ topic: topic })
-                });
-
-                const data = await response.json();
+            $('#researchForm').on('submit', function(e) {
+                e.preventDefault();
                 
-                if (data.error) {
-                    alert('Error: ' + data.error);
+                const topic = $('#topic').val().trim();
+                if (!topic) {
+                    showStatus('❌ Please enter a research topic.', 'error');
                     return;
                 }
 
-                document.getElementById('reportContent').innerHTML = 
-                    data.report.replace(/\n/g, '<br>');
-                resultContainer.classList.remove('d-none');
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                loader.style.display = 'none';
+                currentTopic = topic;
+                $('#loadingIndicator').removeClass('hidden');
+                $('#resultSection').addClass('hidden');
+                $('#articleSection').addClass('hidden');
+                $('#downloadButton').addClass('hidden');
+
+                $.ajax({
+                    url: '/generate',
+                    method: 'POST',
+                    data: { topic: topic },
+                    success: function(response) {
+                        $('#loadingIndicator').addClass('hidden');
+                        $('#resultSection').removeClass('hidden');
+                        
+                        if (response.success) {
+                            showStatus(response.message, 'success');
+                            
+                            // Clean and format the article text
+                            const formattedText = response.article
+                                .replace(/\*\*/g, '') // Remove asterisks
+                                .trim(); // Remove extra whitespace
+                            
+                            // Display the formatted article
+                            $('#articleContent').html(formattedText);
+                            $('#articleSection').removeClass('hidden');
+                            $('#downloadButton').removeClass('hidden');
+                        } else {
+                            showStatus(response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        $('#loadingIndicator').addClass('hidden');
+                        showStatus('❌ Server error occurred.', 'error');
+                    }
+                });
+            });
+
+            $('#downloadButton').on('click', function() {
+                if (currentTopic) {
+                    window.location.href = `/download/${encodeURIComponent(currentTopic)}`;
+                }
+            });
+
+            function showStatus(message, type) {
+                const statusDiv = $('#statusMessage');
+                statusDiv.removeClass('bg-green-100 bg-red-100 text-green-700 text-red-700');
+                
+                if (type === 'success') {
+                    statusDiv.addClass('bg-green-100 text-green-700');
+                } else {
+                    statusDiv.addClass('bg-red-100 text-red-700');
+                }
+                
+                statusDiv.text(message);
             }
         });
-
-        function downloadReport() {
-            const content = document.getElementById('reportContent').innerText;
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'research_report.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
     </script>
 </body>
 </html>
