@@ -1,25 +1,14 @@
-<<<<<<< HEAD
 from flask import Flask, request, jsonify, render_template, send_file
-=======
-from flask import Flask, request, jsonify, render_template
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
 from config import llm
 from state import ResearchState
 from dataclasses import asdict
 from main import create_workflow
 import os
-<<<<<<< HEAD
 import pdfkit
-=======
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
-<<<<<<< HEAD
-=======
-# Compile the workflow once and reuse it
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
 executor = create_workflow()
 
 @app.route("/")
@@ -38,7 +27,6 @@ def generate_report():
         # Create ResearchState object
         state = ResearchState(topic=topic, llm=llm)
         state_dict = asdict(state)
-<<<<<<< HEAD
 
         # Remove non-serializable objects (like LLM)
         state_dict.pop("llm", None)
@@ -50,21 +38,10 @@ def generate_report():
             return str(obj)  # Convert non-serializable objects to string
         
         state_dict = {key: make_serializable(value) for key, value in state_dict.items()}
-=======
-        state_dict.pop("llm", None)  # Remove non-serializable field
-
-        # Add any additional preprocessing here
-        state_dict = {
-            key: str(value) if not isinstance(value, (str, int, float, bool, list, dict)) 
-            else value 
-            for key, value in state_dict.items()
-        }
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
 
         # Execute the workflow
         result = executor.invoke(state_dict)
 
-<<<<<<< HEAD
         # Debugging log
         app.logger.info(f"Workflow result: {result}")
 
@@ -74,18 +51,12 @@ def generate_report():
         return jsonify({
             "topic": topic,
             "report": final_report
-=======
-        return jsonify({
-            "topic": topic,
-            "report": result.get("final_report", "No report generated.")
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
         })
 
     except Exception as e:
         app.logger.error(f"Error generating report: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-<<<<<<< HEAD
 
 @app.route("/download_pdf", methods=["POST"])
 def download_pdf():
@@ -127,9 +98,3 @@ def download_pdf():
 # Gunicorn will look for 'app' at the module level
 if __name__ == "__main__":
     app.run(debug = True)
-=======
-# Gunicorn will look for 'app' at the module level
-if __name__ == "__main__":
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=5000)
->>>>>>> 9791ae470f178e839d8efe96fd29d3f1a8866b61
