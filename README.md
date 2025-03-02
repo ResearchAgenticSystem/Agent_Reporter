@@ -1,75 +1,75 @@
-# Multi-Agent Model
+# Research PDF Generator
 
-This project is a multi-agent system built using [LangGraph](https://github.com/langchain-ai/langgraph). It consists of three agents:
-
-- **Researcher Agent**: Gathers information and insights.
-- **Reporter Agent**: Summarizes and structures the collected information.
-- **Storage Agent**: Saves the processed data for future use.
+A modern web application that generates comprehensive research reports on any topic and allows users to download them as PDFs.
 
 ## Features
 
-- Modular architecture with configurable agents.
-- Workflow-based execution using LangGraph.
-- Persistent state management.
-- Configurable settings via a config file.
+- Generate detailed research reports on any topic
+- View the research results directly in the browser
+- Download reports as professionally formatted PDFs
+- Light and dark mode support
+- Recent topics history
+- Responsive design for all devices
 
-## Installation
+## Tech Stack
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/yourusername/multi-agent-model.git
-   cd multi-agent-model
+- **Frontend**: React, TypeScript, Tailwind CSS, Framer Motion
+- **Backend**: Flask, WeasyPrint
+- **AI**: LangGraph workflow for research generation
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16+)
+- Python (v3.8+)
+- pip
+
+### Installation
+
+1. Clone the repository
+2. Install frontend dependencies:
    ```
-
-2. Create a virtual environment (optional but recommended):
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   npm install
    ```
-
-3. Install dependencies:
-   ```sh
+3. Install backend dependencies:
+   ```
    pip install -r requirements.txt
    ```
 
-## Usage
+### Running the Application
 
-1. Configure the system using `config.yaml`.
-2. Run the main script:
-   ```sh
-   python main.py
+1. Start the backend server:
    ```
+   python app.py
+   ```
+2. In a separate terminal, start the frontend development server:
+   ```
+   npm run dev
+   ```
+3. Open your browser and navigate to `http://localhost:5173`
 
-## Project Structure
-```
-.
-├── config.yaml        # Configuration file for agents and workflows
-├── main.py            # Entry point to execute the multi-agent system
-├── workflow.py        # Defines the agent workflow and interactions
-├── state.py           # Manages persistent state
-├── agents/            # Directory containing agent implementations
-│   ├── researcher.py
-│   ├── reporter.py
-│   ├── storage.py
-│   └── __init__.py
-├── requirements.txt   # Dependencies list
-└── README.md          # Project documentation
-```
+### Building for Production
 
-## Configuration
-Modify `config.yaml` to adjust agent parameters and workflow settings. Example:
-```yaml
-agents:
-  researcher:
-    model: "gpt-4"
-  reporter:
-    format: "markdown"
-  storage:
-    database: "data/storage.db"
-```
+1. Build the frontend:
+   ```
+   npm run build
+   ```
+2. The built files will be in the `dist` directory, which the Flask app will serve
+3. Run the Flask app:
+   ```
+   python app.py
+   ```
+4. Access the application at `http://localhost:5000`
+
+## Deployment
+
+The application is configured for easy deployment:
+
+1. Build the frontend
+2. The Flask app is configured to serve the static files from the `dist` directory
+3. Deploy the Flask application to your preferred hosting service
 
 ## License
-This project is licensed under the MIT License.
 
-## Contributions
-Feel free to open issues or submit pull requests to enhance the project!
+This project is licensed under the MIT License - see the LICENSE file for details.
