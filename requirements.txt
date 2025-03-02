@@ -7,3 +7,5 @@ dataclasses-json
 wikipedia-api
 arxiv
 tiktoken
+weasyprint
+markdown2

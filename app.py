@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file, jsonify
-import pdfkit
+from weasyprint import HTML  # Replace pdfkit with WeasyPrint
 import tempfile
 import os
 from main import create_workflow
@@ -65,55 +65,55 @@ def download_pdf(topic):
             
         # Create HTML content
         html_content = f"""
-        <html>
-            <head>
-                <style>
-                    body {{
-                        font-family: Arial, sans-serif;
-                        margin: 40px;
-                        line-height: 1.6;
-                    }}
-                    h1 {{ 
-                        color: #2c3e50;
-                        font-size: 24px;
-                        margin-bottom: 20px;
-                    }}
-                    h2 {{
-                        color: #34495e;
-                        font-size: 20px;
-                        margin-top: 20px;
-                        margin-bottom: 10px;
-                    }}
-                    .section {{
-                        margin-bottom: 20px;
-                    }}
-                    p {{
-                        margin-bottom: 10px;
-                    }}
-                </style>
-            </head>
-            <body>
-                <h1>{topic}</h1>
-                <div class="section">
-                    {result.get('formatted_article', '')}
-                </div>
-            </body>
-        </html>
-        """
+<html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                line-height: 1.6;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }}
+            .container {{
+                border: 2px solid #2c3e50;
+                padding: 20px;
+                width: 90%;
+                max-width: 800px;
+                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }}
+            h1 {{ 
+                color: #2c3e50;
+                font-size: 24px;
+                margin-bottom: 20px;
+                text-align: center;
+            }}
+            .content {{
+                max-height: 100%;
+                overflow: auto;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>{topic}</h1>
+            <div class="content">
+                {result.get('formatted_article', '')}
+            </div>
+        </div>
+    </body>
+</html>
+"""
+
         
-        # Create temporary files
-        temp_html = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
+        # Create a temporary PDF file
         temp_pdf = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
         
-        # Write HTML content
-        with open(temp_html.name, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-        
-        # Convert to PDF using pdfkit
-        pdfkit.from_file(temp_html.name, temp_pdf.name)
-        
-        # Clean up HTML file
-        os.unlink(temp_html.name)
+        # Generate PDF using WeasyPrint
+        HTML(string=html_content).write_pdf(temp_pdf.name)
         
         return send_file(
             temp_pdf.name,

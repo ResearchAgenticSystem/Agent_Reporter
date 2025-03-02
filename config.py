@@ -17,7 +17,7 @@ def get_llm() -> BaseLLM:
     
     try:
         return HuggingFaceEndpoint(
-            repo_id="deepseek-ai/deepseek-llm-r1-7b",  
+            repo_id="bartowski/Meta-Llama-3.1-8B-Claude-GGUF",  
             huggingfacehub_api_token=api_token,
             temperature=0.7,
             max_length=8192,  
