@@ -5,6 +5,12 @@
 /.pnp
 .pnp.js
 
+# virtual environment
+.venv
+
+# Python cache
+__pycache__/
+
 # testing
 /coverage
 
