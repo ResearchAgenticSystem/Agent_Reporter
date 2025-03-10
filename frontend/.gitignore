@@ -5,6 +5,15 @@
 /.pnp
 .pnp.js
 
+<<<<<<< HEAD
+=======
+# virtual environment
+.venv
+
+# Python cache
+__pycache__/
+
+>>>>>>> a877ce14984f3d2502b116a50348bf8e47bc6862
 # testing
 /coverage
 
@@ -32,4 +41,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+<<<<<<< HEAD
 next-env.d.ts
+=======
+next-env.d.ts
+>>>>>>> a877ce14984f3d2502b116a50348bf8e47bc6862
