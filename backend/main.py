@@ -1,5 +1,5 @@
 from langgraph.graph.state import StateGraph
-from config import llm
+from config import generate_response
 from state import ResearchState
 from dataclasses import asdict
 from workflow_nodes import get_research, generate_news_article, save_output
@@ -7,17 +7,15 @@ from workflow_nodes import get_research, generate_news_article, save_output
 def create_workflow():
     workflow = StateGraph(state_schema=ResearchState)
 
-    # Agents
     workflow.add_node("research_agent", get_research)
     workflow.add_node("reporting_agent", generate_news_article)
-    workflow.add_node("storage_agent", save_output)  # ✅ Added file saving
+    workflow.add_node("storage_agent", save_output) 
 
-    # Workflow sequence
     workflow.add_edge("research_agent", "reporting_agent")
-    workflow.add_edge("reporting_agent", "storage_agent")  # ✅ Store after writing
+    workflow.add_edge("reporting_agent", "storage_agent") 
 
     workflow.set_entry_point("research_agent")
-    workflow.set_finish_point("storage_agent")  # ✅ Final step is saving
+    workflow.set_finish_point("storage_agent")  
 
     return workflow.compile()
 
@@ -32,13 +30,10 @@ if __name__ == "__main__":
     try:
         executor = create_workflow()
 
-        # ✅ Initialize state correctly
         state = ResearchState(topic=topic)
 
-        # ✅ Convert to dictionary before execution
         state_dict = asdict(state)
 
-        # ✅ Execute workflow
         result = executor.invoke(state_dict)
 
         print(result.get("message", "❌ Error: No output message."))

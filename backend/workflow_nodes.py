@@ -3,7 +3,7 @@ import json
 import requests
 from langchain.prompts import PromptTemplate
 from state import ResearchState
-from config import BASE_DIR, llm
+from config import BASE_DIR, generate_response
 from dataclasses import asdict
 import urllib.parse
 
@@ -43,7 +43,7 @@ class ResearchTool:
         try:
             response = requests.get(f"http://export.arxiv.org/api/query?search_query=all:{query}&max_results=1")
             response.raise_for_status()
-            return response.text[:1000]  # Limit text length
+            return response.text[:1000]  
         except Exception as e:
             print(f"⚠️ Arxiv API error: {e}")
             return ""
@@ -100,11 +100,25 @@ def generate_news_article(state: dict) -> dict:
     Include relevant facts and ensure clarity.
     """
 
-    response = llm.invoke(article_prompt)
-    article_text = response.get("text", "").strip() if isinstance(response, dict) else str(response).strip()
+    response = generate_response(article_prompt)
+    article_text = response.strip()
 
-    research_state.article = article_text
+
+    sources = []
+    for line in research_state.research_summary.split("\n"):
+        if "http" in line:  
+            sources.append(line.strip())
+
+    if sources:
+        sources_text = "\n\n**References:**\n" + "\n".join([f"- [{src}]({src})" for src in sources])
+    else:
+        sources_text = ""
+
+    research_state.article = article_text + sources_text
+
     return asdict(research_state)
+
+
 
 def save_output(state: ResearchState) -> dict:
     topic = state.topic.replace(" ", "_")
@@ -121,11 +135,9 @@ def save_output(state: ResearchState) -> dict:
     os.makedirs(BASE_DIR, exist_ok=True)
 
     try:
-        # Save Markdown file
         with open(article_path, "w", encoding="utf-8") as f:
             f.write(f"# {topic}\n\n{article}")
 
-        # Save JSON file
         json_data = {
             "topic": topic,
             "research_summary": research_summary,

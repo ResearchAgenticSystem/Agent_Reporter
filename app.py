@@ -1,17 +1,16 @@
 from flask import Flask, render_template, request, send_file, jsonify
-from weasyprint import HTML  # Replace pdfkit with WeasyPrint
+from weasyprint import HTML 
 import tempfile
 import os
 from main import create_workflow
 from state import ResearchState
 from dataclasses import asdict
 import json
-import markdown2  # For converting markdown to HTML
+import markdown2  
 
 app = Flask(__name__)
 
 def format_article_content(content):
-    # Convert markdown to HTML with extra features enabled
     html_content = markdown2.markdown(content, extras=['fenced-code-blocks', 'break-on-newline'])
     return html_content
 
@@ -30,15 +29,12 @@ def generate_report():
         })
 
     try:
-        # Create and execute workflow
         executor = create_workflow()
         state = ResearchState(topic=topic)
         result = executor.invoke(asdict(state))
         
-        # Format the article content
         formatted_article = format_article_content(result.get('article', ''))
         
-        # Store the result for PDF generation
         session_file = os.path.join(tempfile.gettempdir(), f"{topic.replace(' ', '_')}_result.json")
         with open(session_file, 'w') as f:
             json.dump({**result, 'formatted_article': formatted_article}, f)
@@ -58,12 +54,10 @@ def generate_report():
 @app.route('/download/<topic>')
 def download_pdf(topic):
     try:
-        # Read the stored result
         session_file = os.path.join(tempfile.gettempdir(), f"{topic.replace(' ', '_')}_result.json")
         with open(session_file, 'r') as f:
             result = json.load(f)
             
-        # Create HTML content
         html_content = f"""
 <html>
     <head>
@@ -109,10 +103,8 @@ def download_pdf(topic):
 """
 
         
-        # Create a temporary PDF file
         temp_pdf = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
         
-        # Generate PDF using WeasyPrint
         HTML(string=html_content).write_pdf(temp_pdf.name)
         
         return send_file(
