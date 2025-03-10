@@ -21,6 +21,7 @@ def create_workflow():
 
     return workflow.compile()
 
+
 if __name__ == "__main__":
     topic = input("Enter the topic you want to research: ").strip()
 

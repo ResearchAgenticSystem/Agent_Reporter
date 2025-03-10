@@ -1,9 +1,0 @@
-langchain
-langgraph
-huggingface_hub
-requests
-python-dotenv
-dataclasses-json
-wikipedia-api
-arxiv
-tiktoken
