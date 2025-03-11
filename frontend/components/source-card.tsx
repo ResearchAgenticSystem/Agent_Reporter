@@ -46,7 +46,7 @@ export function SourceCard({
         {source.snippet}
       </p>
       
-      <a 
+      {/* <a 
         href={source.url} 
         target="_blank" 
         rel="noopener noreferrer"
@@ -55,7 +55,7 @@ export function SourceCard({
       >
         <ExternalLink className="h-3 w-3" />
         View Source
-      </a>
+      </a> */}
     </motion.div>
   );
 }

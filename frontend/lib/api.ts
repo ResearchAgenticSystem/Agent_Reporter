@@ -82,7 +82,7 @@
       
           setProgress({ stage: "searching", progress: 20, currentAction: "Searching for sources..." });
       
-          const apiUrl = `${API_URL}/generate-test?topic=${encodeURIComponent(topic)}`;
+          const apiUrl = `${API_URL}/generate-beta?topic=${encodeURIComponent(topic)}`;
           console.log(`[useResearch] Fetching from: ${apiUrl}`);
       
           const response = await fetch(apiUrl);

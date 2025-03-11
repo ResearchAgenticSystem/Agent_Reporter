@@ -115,7 +115,6 @@ export default function HistoryPage() {
           >
             {filteredHistory.map((item) => (
               <motion.div
-                key={item.id}
                 variants={fadeInUp}
                 className="bg-card/50 backdrop-blur-sm rounded-lg border border-border p-4 hover:border-primary/50 transition-colors"
               >
